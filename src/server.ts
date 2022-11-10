@@ -40,7 +40,7 @@ const app = express()
 //Use
 app.use(express.json())
 app.use((req, res, next) => {
-  res.header("Acess-Control-Allow-Origin",'https://rosileneangelo.vercel.app')
+  res.header("Acess-Control-Allow-Origin",'*')
   res.header("Acess-Control-Allow-Methods",'GET,POST')
   app.use(cors())
   next()
