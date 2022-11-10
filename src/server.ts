@@ -1,27 +1,26 @@
-
 import express from 'express'
 import { prisma } from './prisma'
 import nodemailer from 'nodemailer'
 import { smtp } from './config/smtp'
-import cors from 'cors'
-// var cors = require('express-cors')
+//import cors from 'cors'
+var cors = require('express-cors')
 
 
-const { port, user, pass, host } = smtp
+const {port, user, pass, host} = smtp
 
 
 const transporter = nodemailer.createTransport({
   port,
   host,
   secure: false,
-  auth: {
+  auth:{
     user,
     pass
   },
-  tls: {
-    rejectUnauthorized: false
+  tls:{
+    rejectUnauthorized:false
   }
-
+  
 
 })
 
@@ -35,38 +34,34 @@ const app = express()
 //  methods: "GET, PUT, POST"
 //}
 
-// 'https://rosileneangelo.vercel.app', 'http://localhost:5173'
-
 //Use
 app.use(express.json())
-app.use((req, res, next) => {
-  res.header("Acess-Control-Allow-Origin",'*')
-  res.header("Acess-Control-Allow-Methods",'GET,POST')
-  app.use(cors())
-  next()
+app.use(cors({
+  allowedOrigins: [
+      'https://rosileneangelo.vercel.app', 'http://localhost:5173'
+  ]
+}))
 
-})
-
-app.post('/confirm', async (req, res) => {
-  const { nome } = req.body
-
-
+app.post('/confirm', async (req, res)=> {
+  const {nome} = req.body
+  
+  
 
   const convidado = await prisma.convidado.upsert({
-    where: {
+    where:{
       nome
     },
-    update: {
+    update:{
       nome
     },
-    create: {
+    create:{
       nome
     }
   })
 
   const mailsend = await transporter.sendMail({
     text: `${nome} acaba(m) de confirmar presença em seu casamento!`,
-    subject: "Confirmação de presença",
+    subject:"Confirmação de presença",
     from: "Convite Interativo Async <convite.interativoasync@gmail.com>",
     to: ["angello.sistem@gmail.com", "joo.santos8psy@gmail.com", "rosy_anjin@hotmail.com"]
   })
@@ -74,11 +69,11 @@ app.post('/confirm', async (req, res) => {
   return res.status(201).json(convidado)
 })
 
-app.get('/confirm', async (req, res) => {
-
-
+app.get('/confirm', async (req, res)=> {
+  
+  
   const convidado = await prisma.convidado.findMany()
   return res.status(201).json(convidado)
 })
 
-app.listen(process.env.PORT || 3333, () => { console.log("HTTP server running") })
+app.listen(process.env.PORT || 3333, ()=> {console.log("HTTP server running")})
